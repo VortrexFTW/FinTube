@@ -51,6 +51,7 @@ public class FinTubeActivityController : ControllerBase
             public string ytid {get; set;} = "";
             public string targetlibrary{get; set;} = "";
             public string targetfolder{get; set;} = "";
+            public string ytdlpargs{get; set;} = "";
             public string targetfilename { get; set; } = "";
             public bool audioonly{get; set;} = false;
             public bool preferfreeformat{get; set;} = false;
@@ -68,7 +69,7 @@ public class FinTubeActivityController : ControllerBase
         {
             try
             {
-                _logger.LogInformation("FinTubeDownload : {ytid} to {targetfoldeer}, prefer free format: {preferfreeformat} audio only: {audioonly}", data.ytid, data.targetfolder, data.preferfreeformat, data.audioonly);
+                _logger.LogInformation("FinTubeDownload : {ytid} to {targetfoldeer}, prefer free format: {preferfreeformat} audio only: {audioonly}, custom yt-dlp args: {ytdlpargs}", data.ytid, data.targetfolder, data.preferfreeformat, data.audioonly, data.ytdlpargs);
 
                 Dictionary<string, object> response = new Dictionary<string, object>();
                 PluginConfiguration? config = Plugin.Instance.Configuration;
@@ -78,9 +79,9 @@ public class FinTubeActivityController : ControllerBase
                 // check binaries
                 if(!System.IO.File.Exists(config.exec_YTDL))
                     throw new Exception("YT-DL Executable configured incorrectly");
-                
+
                 bool hasid3v2 = System.IO.File.Exists(config.exec_ID3);
-                
+
 
                 // Ensure proper / separator
                 data.targetfolder = String.Join("/", data.targetfolder.Split("/", StringSplitOptions.RemoveEmptyEntries));
@@ -131,6 +132,8 @@ public class FinTubeActivityController : ControllerBase
                     args += $" -o \"{targetFilename}-%(title)s.%(ext)s\" {data.ytid}";
                 }
 
+                args += $" {data.commandlineargs}";
+
                 status += $"Exec: {config.exec_YTDL} {args}<br>";
 
                 var procyt = createProcess(config.exec_YTDL, args);
@@ -142,7 +145,7 @@ public class FinTubeActivityController : ControllerBase
                 {
                     args = $"-a \"{data.artist}\" -A \"{data.album}\" -t \"{data.title}\" -T \"{data.track}\" \"{targetFilename}{targetExtension}\"";
 
-                    status += $"Exec: {config.exec_ID3} {args}<br>"; 
+                    status += $"Exec: {config.exec_ID3} {args}<br>";
 
                     var procid3 = createProcess(config.exec_ID3, args);
                     procid3.Start();
