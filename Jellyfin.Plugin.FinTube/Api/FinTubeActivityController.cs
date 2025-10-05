@@ -132,7 +132,7 @@ public class FinTubeActivityController : ControllerBase
                     args += $" -o \"{targetFilename}-%(title)s.%(ext)s\" {data.ytid}";
                 }
 
-                args += $" {data.commandlineargs}";
+                args += $" {data.ytdlpargs}";
 
                 status += $"Exec: {config.exec_YTDL} {args}<br>";
 
